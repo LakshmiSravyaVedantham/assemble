@@ -19,14 +19,56 @@ Read `~/.claude/skills/assemble/status-schema.md`, `~/.claude/skills/assemble/te
 
 ## Phase 1 — Intake
 
-Ask these 4 questions one at a time. Wait for the answer to each before asking the next. Do not ask multiple questions in one message.
+Before asking the user anything, read the project context:
 
-1. "What are we building or solving?"
-2. "What constraints matter? (timeline, tech stack, budget, team preferences)"
-3. "What does done look like? What would make this a success?"
-4. "Any teams or roles you want included or excluded?"
+1. Check for `README.md` in the current directory — read it if it exists
+2. Check for `CLAUDE.md` — read it if it exists
+3. Check for `pyproject.toml`, `package.json`, or `Cargo.toml` — read whichever exists
+4. Run `git log --oneline -20` to see recent commit history
+5. Check if a `docs/` directory exists — read any files inside it that are relevant to the goal, constraints, or success criteria
 
-After all 4 answers, summarize what you heard in 3 bullet points and confirm before moving to Phase 2.
+Using what you found, infer the 4 intake fields:
+- **Goal**: What is being built or solved?
+- **Constraints**: Tech stack, timeline, budget, team preferences visible in config or README
+- **Done**: What does success look like? Check for acceptance criteria, a "usage" section, or test descriptions
+- **Teams**: Which of the 8 default teams are relevant to this project?
+
+Assign a confidence level to each field:
+- **high** — Clear README or config file confirms it; include as-is
+- **medium** — Inferred from git history or partial docs; include with inline note "best guess — correct if wrong"
+- **low** — Cannot determine from context; ask the user before presenting the brief
+
+Present the pre-filled brief in this format. Medium-confidence fields carry a visible annotation inline:
+
+```
+ASSEMBLE — Reading project context...
+
+✓ README.md — found
+✓ pyproject.toml — found
+✓ git history — [N] commits
+✗ docs/ — not found
+
+Here is what I gathered:
+
+┌ INTAKE BRIEF
+│ Goal: [inferred goal]
+│ Constraints: [inferred constraints] ← best guess — correct if wrong
+│ Done: [inferred success criteria]
+│ Teams: [suggested teams from library]
+│ Confidence: high on Goal and Done, medium on Constraints — inferred from README + git history
+└
+
+Looks right? (yes / correct [field]: [new value])
+```
+
+**If the user says `yes`:** proceed to Phase 2 immediately.
+
+**If the user corrects a field:** update that field, re-present the full brief. Repeat until the user says `yes`. There is no limit on correction rounds.
+
+**If confidence is low on any field:** do not guess — ask only for that field before presenting the brief:
+> "I couldn't determine [field] from the project — [specific question]?"
+
+Never ask all 4 questions. Only ask for what you cannot infer.
 
 ---
 
