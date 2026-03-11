@@ -27,7 +27,8 @@ Give it a problem. It assembles the right cross-functional teams, assigns missio
 ## Architecture
 
 ```
-assemble.md          ← PM prompt (4 phases + querying)
+SKILL.md             ← PM prompt (4 phases + querying) — registered with Claude Code
+assemble.md          ← Standalone PM prompt (same content, for reference)
 team-agent.md        ← Team agent prompt template
 team-library.md      ← 8 default teams with missions and output artifacts
 status-schema.md     ← Data contracts between PM and team agents
@@ -58,14 +59,33 @@ PM selects the minimum needed for your project. You can include or exclude teams
 
 ## Install
 
-1. Copy the 4 skill files to `~/.claude/skills/assemble/`:
+Claude Code skills must be registered via a `SKILL.md` file inside a plugin directory. The support files can live anywhere readable.
+
+**Step 1 — Copy support files:**
 
 ```bash
-git clone https://github.com/LakshmiSravyaVedantham/assemble.git
-cp assemble/*.md ~/.claude/skills/assemble/
+mkdir -p ~/.claude/skills/assemble
+git clone https://github.com/LakshmiSravyaVedantham/assemble.git /tmp/assemble
+cp /tmp/assemble/team-agent.md ~/.claude/skills/assemble/
+cp /tmp/assemble/team-library.md ~/.claude/skills/assemble/
+cp /tmp/assemble/status-schema.md ~/.claude/skills/assemble/
 ```
 
-2. Run `/assemble` in Claude Code.
+**Step 2 — Register the skill with Claude Code:**
+
+If you have the [superpowers plugin](https://github.com/obra/superpowers) installed:
+
+```bash
+SKILLS_DIR=~/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.0/skills
+mkdir -p "$SKILLS_DIR/assemble"
+cp /tmp/assemble/SKILL.md "$SKILLS_DIR/assemble/SKILL.md"
+```
+
+**Step 3 — Run it:**
+
+```
+/assemble
+```
 
 ---
 
